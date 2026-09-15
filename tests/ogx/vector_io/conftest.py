@@ -141,7 +141,7 @@ def ragas_samples(
                     "4. Only provide the final answer\n"
                     "5. If the answer is not found in the context, respond with 'I don't know'"
                 ),
-                tools=[{"type": "file_search", "vector_store_ids": [vector_store.id]}],
+                tools=[{"type": "file_search", "vector_store_ids": [vector_store.id], "max_num_results": 3}],
                 stream=False,
                 input=record.question,
             )

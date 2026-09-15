@@ -24,6 +24,8 @@ ignore_missing_imports = true
 [tool.uv]
 override-dependencies = [
     "marshmallow>=4.0",
+    "scipy>=1.13.0,<1.18.0",
+    "numpy>=2.1.0,<2.5.0",
 ]
 
 # Add IBM Power wheels repository for ppc64le architecture
@@ -54,6 +56,14 @@ grpcio = [
     { index = "pypi", marker = "platform_machine != 'ppc64le'" },
 ]
 pynacl = [
+    { index = "ibm-power-wheels", marker = "platform_machine == 'ppc64le'" },
+    { index = "pypi", marker = "platform_machine != 'ppc64le'" },
+]
+pillow = [
+    { index = "ibm-power-wheels", marker = "platform_machine == 'ppc64le'" },
+    { index = "pypi", marker = "platform_machine != 'ppc64le'" },
+]
+scikit-network = [
     { index = "ibm-power-wheels", marker = "platform_machine == 'ppc64le'" },
     { index = "pypi", marker = "platform_machine != 'ppc64le'" },
 ]
@@ -152,6 +162,8 @@ dependencies = [
     "ragas>=0.4",
     "numpy>=2.1.0,<2.5.0",
     "scipy>=1.13.0,<1.18.0",
+    "pillow",
+    "scikit-network",
     "langchain-community<0.4.2",
     "ipykernel>=7.3.0",
     "boto3>=1.43.33",
