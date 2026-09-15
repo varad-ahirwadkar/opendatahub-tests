@@ -458,16 +458,10 @@ def get_pgvector_deployment_template() -> dict[str, Any]:
                         },
                         {"name": "PGDATA", "value": "/var/lib/postgresql/data/pgdata"},
                     ],
-                    "volumeMounts": [
-                        {"name": "pgdata", "mountPath": "/var/lib/postgresql/data"},
-                        # OpenShift runs the pod with a random UID, which cannot write to the image's
-                        # /var/run/postgresql (owned by uid 999). Without a writable dir here, postgres
-                        # fails to create its socket lock file and exits.
-                        {"name": "pgrun", "mountPath": "/var/run/postgresql"},
-                    ],
+                    "volumeMounts": [{"name": "pgdata", "mountPath": "/var/lib/postgresql/data"}],
                 }
             ],
-            "volumes": [{"name": "pgdata", "emptyDir": {}}, {"name": "pgrun", "emptyDir": {}}],
+            "volumes": [{"name": "pgdata", "emptyDir": {}}],
         },
     }
 
