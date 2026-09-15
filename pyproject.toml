@@ -64,7 +64,6 @@ pillow = [
     { index = "pypi", marker = "platform_machine != 'ppc64le'" },
 ]
 scikit-network = [
-    { index = "ibm-power-wheels", marker = "platform_machine == 'ppc64le'" },
     { index = "pypi", marker = "platform_machine != 'ppc64le'" },
 ]
 
@@ -163,7 +162,7 @@ dependencies = [
     "numpy>=2.1.0,<2.5.0",
     "scipy>=1.13.0,<1.18.0",
     "pillow",
-    "scikit-network",
+    "scikit-network; platform_machine != 'ppc64le'",
     "langchain-community<0.4.2",
     "ipykernel>=7.3.0",
     "boto3>=1.43.33",
