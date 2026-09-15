@@ -33,7 +33,7 @@ def ragas_evaluator_llm(
     base_url = str(ogx_client.base_url).rstrip("/")
     verify_ssl = os.getenv("OGX_CLIENT_VERIFY_SSL", "false").lower() == "true"
 
-    http_client = httpx.Client(verify=verify_ssl, timeout=httpx.Timeout(240.0))
+    http_client = httpx.Client(verify=verify_ssl, timeout=httpx.Timeout(900.0))
     try:
         openai_client = OpenAI(
             api_key=os.getenv("OGX_CORE_VLLM_API_TOKEN", ""),
@@ -141,7 +141,7 @@ def ragas_samples(
                     "4. Only provide the final answer\n"
                     "5. If the answer is not found in the context, respond with 'I don't know'"
                 ),
-                tools=[{"type": "file_search", "vector_store_ids": [vector_store.id]}],
+                tools=[{"type": "file_search", "vector_store_ids": [vector_store.id], "max_num_results": 3}],
                 stream=False,
                 input=record.question,
             )
