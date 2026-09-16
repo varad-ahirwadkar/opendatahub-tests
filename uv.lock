@@ -11,7 +11,13 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "marshmallow", specifier = ">=4.0" }]
+overrides = [
+    { name = "marshmallow", specifier = ">=4.0" },
+    { name = "numpy", marker = "platform_machine != 'ppc64le'", specifier = ">=2.1.0,<2.5.0", index = "https://pypi.org/simple/" },
+    { name = "numpy", marker = "platform_machine == 'ppc64le'", specifier = ">=2.1.0,<2.5.0", index = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" },
+    { name = "scipy", marker = "platform_machine != 'ppc64le'", specifier = ">=1.13.0,<1.18.0", index = "https://pypi.org/simple/" },
+    { name = "scipy", marker = "platform_machine == 'ppc64le'", specifier = ">=1.13.0,<1.18.0", index = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" },
+]
 
 [[package]]
 name = "aiofile"
@@ -1025,7 +1031,7 @@ resolution-markers = [
     "platform_machine != 'ppc64le' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "platform_machine != 'ppc64le'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/b7/48/af6173dbca4454f4637a4678b67f52ca7e0c1ed7d5894d89d434fecede05/grpcio-1.80.0.tar.gz", hash = "sha256:29aca15edd0688c22ba01d7cc01cb000d72b2033f4a3c72a81a19b56fd143257", size = 12978905, upload-time = "2026-03-30T08:49:10.502Z" }
 wheels = [
@@ -1051,7 +1057,7 @@ resolution-markers = [
     "platform_machine == 'ppc64le' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "platform_machine == 'ppc64le'" },
 ]
 wheels = [
     { url = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+f/110/c4f20dc0a969a/grpcio-1.80.0+ppc64le1-cp314-cp314-manylinux_2_34_ppc64le.whl", hash = "sha256:110c4f20dc0a969a306a5dd81b59077a389c67b1b95f5c0fc22179b245e2ecf8" },
@@ -1122,8 +1128,8 @@ name = "httpcore2"
 version = "2.13.0"
 source = { registry = "https://pypi.org/simple/" }
 dependencies = [
-    { name = "h11" },
-    { name = "truststore" },
+    { name = "h11", marker = "sys_platform != 'emscripten'" },
+    { name = "truststore", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/15/8c/e925b1c92018abb3a1863ce1549d76d2381e334d21d65d4ac8f65dabd78a/httpcore2-2.13.0.tar.gz", hash = "sha256:2adc8be4fb285fbcd6d894298db3b52c177e74b6674eda3a76bd36be3292a3db", size = 67740, upload-time = "2026-09-14T14:18:04.717Z" }
 wheels = [
@@ -2234,6 +2240,8 @@ dependencies = [
     { name = "openai" },
     { name = "openshift-python-utilities" },
     { name = "openshift-python-wrapper" },
+    { name = "pillow", version = "12.3.0", source = { registry = "https://pypi.org/simple/" }, marker = "platform_machine != 'ppc64le'" },
+    { name = "pillow", version = "12.3.0", source = { registry = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" }, marker = "platform_machine == 'ppc64le'" },
     { name = "portforward" },
     { name = "protobuf" },
     { name = "pyarrow", version = "23.0.1+ppc64le1", source = { registry = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" }, marker = "platform_machine == 'ppc64le'" },
@@ -2252,6 +2260,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "ragas" },
     { name = "requests" },
+    { name = "scikit-network", marker = "platform_machine != 'ppc64le'" },
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple/" }, marker = "platform_machine != 'ppc64le'" },
     { name = "scipy", version = "1.17.1+ppc64le2", source = { registry = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" }, marker = "platform_machine == 'ppc64le'" },
     { name = "semver" },
@@ -2297,6 +2306,8 @@ requires-dist = [
     { name = "openai", specifier = ">=2.36" },
     { name = "openshift-python-utilities", specifier = ">=5.0.71" },
     { name = "openshift-python-wrapper", specifier = ">=11.0.132" },
+    { name = "pillow", marker = "platform_machine != 'ppc64le'", index = "https://pypi.org/simple/" },
+    { name = "pillow", marker = "platform_machine == 'ppc64le'", index = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" },
     { name = "portforward", specifier = ">=0.7.1" },
     { name = "protobuf" },
     { name = "pyarrow", marker = "platform_machine != 'ppc64le'", specifier = ">=23.0.0", index = "https://pypi.org/simple/" },
@@ -2315,6 +2326,7 @@ requires-dist = [
     { name = "pyyaml" },
     { name = "ragas", specifier = ">=0.4" },
     { name = "requests" },
+    { name = "scikit-network", marker = "platform_machine != 'ppc64le'", index = "https://pypi.org/simple/" },
     { name = "scipy", marker = "platform_machine != 'ppc64le'", specifier = ">=1.13.0,<1.18.0", index = "https://pypi.org/simple/" },
     { name = "scipy", marker = "platform_machine == 'ppc64le'", specifier = ">=1.13.0,<1.18.0", index = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" },
     { name = "semver", specifier = ">=3.0.4" },
@@ -2540,7 +2552,7 @@ name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple/" }
 dependencies = [
-    { name = "ptyprocess" },
+    { name = "ptyprocess", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [
@@ -2551,6 +2563,11 @@ wheels = [
 name = "pillow"
 version = "12.3.0"
 source = { registry = "https://pypi.org/simple/" }
+resolution-markers = [
+    "platform_machine != 'ppc64le' and sys_platform == 'win32'",
+    "platform_machine != 'ppc64le' and sys_platform == 'emscripten'",
+    "platform_machine != 'ppc64le' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+]
 sdist = { url = "https://files.pythonhosted.org/packages/1c/3d/bb7fca845737cf9d7dbde16ed1843984665ff2e0a518f5db43e77ec540b9/pillow-12.3.0.tar.gz", hash = "sha256:3b8182a766685eaa002637e28b4ec8d6b18819a0c71f579bf0dbaa5830297cce", size = 47025035, upload-time = "2026-07-01T11:56:38.965Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/01/001f65b68192f0228cc1dbbc8d2530ab5d58b61037ba0587f946fea607cd/pillow-12.3.0-cp314-cp314-ios_13_0_arm64_iphoneos.whl", hash = "sha256:9cf95fe4d0f84c82d282745d9bb08ad9f926efa00be4697e767b814ce40d4330", size = 4161736, upload-time = "2026-07-01T11:54:51.156Z" },
@@ -2574,6 +2591,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/23/26/fcb2f6e37175b04f53570b59937867e2b80ee1685e744023153028fc14f9/pillow-12.3.0-cp314-cp314t-win32.whl", hash = "sha256:4b0a7fe987b14c31ebda6083f74f22b561fd3739bc0ac51e019622e3d72668c7", size = 6474125, upload-time = "2026-07-01T11:55:30.956Z" },
     { url = "https://files.pythonhosted.org/packages/90/de/3634abee5f1c9e13c56787b7d5517b0ba8d6de51700b95578cf338349c9f/pillow-12.3.0-cp314-cp314t-win_amd64.whl", hash = "sha256:962864dc93511324d51ddbb5b9f8731bf71675b93ca612a07441896f4688fb8c", size = 7242939, upload-time = "2026-07-01T11:55:34.044Z" },
     { url = "https://files.pythonhosted.org/packages/ce/2a/fd13f8eb24de5714a6eb444a3d67e2842c6c576e159a43793adf23051351/pillow-12.3.0-cp314-cp314t-win_arm64.whl", hash = "sha256:0740a512dc522224c77d9aa5a8d70d8b7d73fb91f2c21125d8d025d3b8990e45", size = 2567506, upload-time = "2026-07-01T11:55:35.988Z" },
+]
+
+[[package]]
+name = "pillow"
+version = "12.3.0"
+source = { registry = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" }
+resolution-markers = [
+    "platform_machine == 'ppc64le' and sys_platform == 'win32'",
+    "platform_machine == 'ppc64le' and sys_platform == 'emscripten'",
+    "platform_machine == 'ppc64le' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+]
+wheels = [
+    { url = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+f/455/54840796d06fe/pillow-12.3.0-cp314-cp314-manylinux_2_34_ppc64le.whl", hash = "sha256:45554840796d06fe108d39f82ff2b62db0cce53a22f82cd9cfadeedef6a36871" },
 ]
 
 [[package]]
@@ -2985,7 +3015,7 @@ resolution-markers = [
     "platform_machine != 'ppc64le' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "cffi", marker = "platform_python_implementation != 'PyPy'" },
+    { name = "cffi", marker = "platform_machine != 'ppc64le' and platform_python_implementation != 'PyPy'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d9/9a/4019b524b03a13438637b11538c82781a5eda427394380381af8f04f467a/pynacl-1.6.2.tar.gz", hash = "sha256:018494d6d696ae03c7e656e5e74cdfd8ea1326962cc401bcf018f1ed8436811c", size = 3511692, upload-time = "2026-01-01T17:48:10.851Z" }
 wheels = [
@@ -3025,7 +3055,7 @@ resolution-markers = [
     "platform_machine == 'ppc64le' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "cffi", marker = "platform_python_implementation != 'PyPy'" },
+    { name = "cffi", marker = "platform_machine == 'ppc64le' and platform_python_implementation != 'PyPy'" },
 ]
 wheels = [
     { url = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+f/404/5bd32dc429f31/pynacl-1.6.2+ppc64le1-cp314-cp314-manylinux_2_34_ppc64le.whl", hash = "sha256:4045bd32dc429f316bec1fb74aaecb6b65691343762e3b4ea9a12c32ed0b2568" },
@@ -3382,7 +3412,8 @@ dependencies = [
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple/" }, marker = "platform_machine != 'ppc64le'" },
     { name = "numpy", version = "2.4.6+ppc64le1", source = { registry = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" }, marker = "platform_machine == 'ppc64le'" },
     { name = "openai" },
-    { name = "pillow" },
+    { name = "pillow", version = "12.3.0", source = { registry = "https://pypi.org/simple/" }, marker = "platform_machine != 'ppc64le'" },
+    { name = "pillow", version = "12.3.0", source = { registry = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" }, marker = "platform_machine == 'ppc64le'" },
     { name = "pydantic" },
     { name = "rich" },
     { name = "scikit-network" },
@@ -3638,7 +3669,7 @@ resolution-markers = [
     "platform_machine != 'ppc64le' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple/" } },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple/" }, marker = "platform_machine != 'ppc64le'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/7a/97/5a3609c4f8d58b039179648e62dd220f89864f56f7357f5d4f45c29eb2cc/scipy-1.17.1.tar.gz", hash = "sha256:95d8e012d8cb8816c226aef832200b1d45109ed4464303e997c5b13122b297c0", size = 30573822, upload-time = "2026-02-23T00:26:24.851Z" }
 wheels = [
@@ -3674,7 +3705,7 @@ resolution-markers = [
     "platform_machine == 'ppc64le' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "numpy", version = "2.4.6+ppc64le1", source = { registry = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" } },
+    { name = "numpy", version = "2.4.6+ppc64le1", source = { registry = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/" }, marker = "platform_machine == 'ppc64le'" },
 ]
 wheels = [
     { url = "https://wheels.developerfirst.ibm.com/ppc64le/linux/+f/015/fdbfc83d3137b/scipy-1.17.1+ppc64le2-cp314-cp314-manylinux_2_34_ppc64le.whl", hash = "sha256:015fdbfc83d3137b364bc57196db00064a88f4a584415f15e9ce488a94482072" },
@@ -3685,8 +3716,8 @@ name = "secretstorage"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple/" }
 dependencies = [
-    { name = "cryptography" },
-    { name = "jeepney" },
+    { name = "cryptography", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "jeepney", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1c/03/e834bcd866f2f8a49a85eaff47340affa3bfa391ee9912a952a1faa68c7b/secretstorage-3.5.0.tar.gz", hash = "sha256:f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be", size = 19884, upload-time = "2025-11-23T19:02:53.191Z" }
 wheels = [
