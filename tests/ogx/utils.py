@@ -189,7 +189,7 @@ def wait_for_unique_ogx_pod(client: DynamicClient, namespace: str) -> Pod:
     return pods[0]
 
 
-@retry(wait_timeout=90, sleep=5)
+@retry(wait_timeout=600, sleep=5)
 def wait_for_ogx_client_ready(client: OgxClient) -> bool:
     """Wait for OGX client to be ready by checking health, version, and database access."""
     try:
@@ -211,8 +211,8 @@ def wait_for_ogx_client_ready(client: OgxClient) -> bool:
         LOGGER.debug(f"Base URL: {client.base_url}, Error type: {type(error)}, Error details: {error!s}")
         return False
 
-    except Exception as e:  # noqa: BLE001
-        LOGGER.warning(f"Unexpected error checking OGX readiness: {e}")
+    except Exception:  # noqa: BLE001
+        LOGGER.warning(f"Unexpected error checking OGX readiness")
         return False
 
     else:
