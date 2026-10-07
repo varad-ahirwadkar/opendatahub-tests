@@ -676,7 +676,7 @@ longbench_multi_news_e,59032,false,Unknown,false,3
 longbench_multifieldqa_en_e,59032,false,Unknown,false,3
 longbench_gov_report_e,59032,false,Unknown,false,3
 longbench_trec_e,59032,false,Unknown,false,3
-wsc273,50560,true,allenai/winograd_wsc,false,1
+wsc273,50560,false,allenai/winograd_wsc,false,1
 mmlu_pro_llama_other,50447,true,TIGER-Lab/MMLU-Pro,true,1
 mmlu_pro_llama_health,50447,true,TIGER-Lab/MMLU-Pro,true,1
 mmlu_pro_llama_engineering,50447,true,TIGER-Lab/MMLU-Pro,true,1
