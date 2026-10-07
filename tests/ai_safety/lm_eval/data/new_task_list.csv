@@ -834,7 +834,7 @@ prompt_robustness_math_algebra,26854,true,EleutherAI/hendrycks_math,false,1
 prompt_robustness_math_counting_and_prob,26854,true,EleutherAI/hendrycks_math,false,1
 hendrycks_math,26854,true,Unknown,false,1
 score_robustness,26610,true,Unknown,true,1
-piqa,26082,true,ybisk/piqa,false,1
+piqa,26082,false,ybisk/piqa,false,1
 leaderboard_math_algebra_hard,24634,true,DigitalLearningGmbH/MATH-lighteval,false,1
 leaderboard_math_hard,24634,true,Unknown,false,1
 leaderboard_math_intermediate_algebra_hard,24634,true,DigitalLearningGmbH/MATH-lighteval,false,1
