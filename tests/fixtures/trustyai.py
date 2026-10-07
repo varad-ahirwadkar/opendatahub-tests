@@ -50,6 +50,20 @@ def patched_dsc_lmeval_allow_all(
 ) -> Generator[DataScienceCluster]:
     """Enable LMEval PermitOnline and PermitCodeExecution flags in the Datascience cluster."""
     dsc = get_data_science_cluster(client=admin_client)
+    # Always fetch replicas via a fresh API call (new Deployment object) so the
+    # value is never stale from a prior test class that left the deployment
+    # scaled down. This must also happen before entering the ResourceEditor block
+    # because the DSC patch triggers the ODH operator to reconcile immediately,
+    # which can set replicas to 0 before we read them. Fall back to 1 to guard
+    # against a broken cluster state cascading into this test.
+    num_replicas: int = (
+        Deployment(
+            client=admin_client,
+            name=trustyai_operator_deployment.name,
+            namespace=trustyai_operator_deployment.namespace,
+        ).instance.spec.replicas
+        or 1
+    )
     with ResourceEditor(
         patches={
             dsc: {
@@ -68,7 +82,6 @@ def patched_dsc_lmeval_allow_all(
             }
         }
     ):
-        num_replicas: int = trustyai_operator_deployment.instance.spec.replicas
         trustyai_operator_deployment.scale_replicas(replica_count=0)
         trustyai_operator_deployment.scale_replicas(replica_count=num_replicas)
         trustyai_operator_deployment.wait_for_replicas()

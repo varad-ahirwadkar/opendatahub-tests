@@ -24,8 +24,8 @@ arc_challenge_llama,219310,false,Unknown,false,3
 arc_easy,219310,true,allenai/ai2_arc,false,1
 arc_challenge,219310,true,allenai/ai2_arc,false,1
 openllm,213563,true,Unknown,false,1
-hellaswag,186239,true,hellaswag,false,1
-winogrande,158151,true,winogrande,false,1
+hellaswag,186239,true,Rowan/hellaswag,false,1
+winogrande,158151,true,allenai/winogrande,false,1
 mmlu_college_physics,140066,true,hails/mmlu_no_train,false,1
 mmlu,140066,true,Unknown,false,1
 mmlu_college_biology,140066,true,hails/mmlu_no_train,false,1
@@ -624,7 +624,7 @@ flan_held_out,81718,true,Unknown,false,1
 pythia,81645,true,Unknown,false,1
 lambada_openai_mt_fr,79640,true,EleutherAI/lambada_openai,false,1
 lambada,79640,false,Unknown,false,3
-lambada_standard,79640,true,lambada,false,1
+lambada_standard,79640,true,EleutherAI/lambada,false,1
 lambada_openai,79640,true,EleutherAI/lambada_openai,false,1
 lambada_openai_mt_en,79640,true,EleutherAI/lambada_openai,false,1
 lambada_multilingual,79640,false,Unknown,false,3
@@ -676,7 +676,7 @@ longbench_multi_news_e,59032,false,Unknown,false,3
 longbench_multifieldqa_en_e,59032,false,Unknown,false,3
 longbench_gov_report_e,59032,false,Unknown,false,3
 longbench_trec_e,59032,false,Unknown,false,3
-wsc273,50560,true,winograd_wsc,false,1
+wsc273,50560,true,allenai/winograd_wsc,false,1
 mmlu_pro_llama_other,50447,true,TIGER-Lab/MMLU-Pro,true,1
 mmlu_pro_llama_health,50447,true,TIGER-Lab/MMLU-Pro,true,1
 mmlu_pro_llama_engineering,50447,true,TIGER-Lab/MMLU-Pro,true,1
@@ -834,7 +834,7 @@ prompt_robustness_math_algebra,26854,true,EleutherAI/hendrycks_math,false,1
 prompt_robustness_math_counting_and_prob,26854,true,EleutherAI/hendrycks_math,false,1
 hendrycks_math,26854,true,Unknown,false,1
 score_robustness,26610,true,Unknown,true,1
-piqa,26082,true,piqa,false,1
+piqa,26082,true,ybisk/piqa,false,1
 leaderboard_math_algebra_hard,24634,true,DigitalLearningGmbH/MATH-lighteval,false,1
 leaderboard_math_hard,24634,true,Unknown,false,1
 leaderboard_math_intermediate_algebra_hard,24634,true,DigitalLearningGmbH/MATH-lighteval,false,1
@@ -852,9 +852,9 @@ xwinograd,22508,true,Unknown,false,1
 xwinograd_ru,22508,true,Muennighoff/xwinograd,false,1
 xwinograd_jp,22508,true,Muennighoff/xwinograd,false,1
 xwinograd_fr,22508,true,Muennighoff/xwinograd,false,1
-social_iqa,22501,true,social_i_qa,false,1
+social_iqa,22501,true,allenai/social_i_qa,false,1
 ifeval,20768,true,google/IFEval,true,1
-sciq,18886,true,sciq,false,1
+sciq,18886,true,allenai/sciq,false,1
 wmdp_cyber,14596,true,cais/wmdp,false,1
 wmdp_chem,14596,true,cais/wmdp,false,1
 wmdp_bio,14596,true,cais/wmdp,false,1
