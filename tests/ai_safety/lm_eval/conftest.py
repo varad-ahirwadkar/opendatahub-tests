@@ -163,11 +163,30 @@ def lmeval_data_downloader_pod(
         name="lmeval-downloader",
         label={"lmevaltests": "vllm"},
         security_context={"fsGroup": 1000, "seccompProfile": {"type": "RuntimeDefault"}},
+        init_containers=[
+            {
+                "name": "flan-data-copy-to-pvc",
+                "image": "quay.io/trustyai_testing/lmeval-assets-flan-t5-base"
+                "@sha256:f7326d5b4069e9aa0b12ab77b1e8aa8dd25dd0bffd77b08fcc84988ea8869f7f",
+                "command": ["/bin/sh", "-c", "cp -r /mnt/data/flan /mnt/pvc/flan"],
+                "securityContext": {
+                    "runAsUser": 1000,
+                    "runAsNonRoot": True,
+                    "allowPrivilegeEscalation": False,
+                    "capabilities": {"drop": ["ALL"]},
+                },
+                "volumeMounts": [{"mountPath": "/mnt/pvc", "name": "pvc-volume"}],
+            }
+        ],
         containers=[
             {
                 "name": "data",
                 "image": request.param.get("image"),
-                "command": ["/bin/sh", "-c", "cp -r /mnt/data/. /mnt/pvc/ && chmod -R g+w /mnt/pvc/datasets"],
+                "command": [
+                    "/bin/sh",
+                    "-c",
+                    "cp -r /mnt/data/datasets /mnt/pvc/datasets && chmod -R g+w /mnt/pvc/datasets",
+                ],
                 "securityContext": {
                     "runAsUser": 1000,
                     "runAsNonRoot": True,
@@ -278,8 +297,7 @@ def lmeval_minio_deployment(
                 "containers": [
                     {
                         "name": MinIo.Metadata.NAME,
-                        "image": "quay.io/minio/minio"
-                        "@sha256:46b3009bf7041eefbd90bd0d2b38c6ddc24d20a35d609551a1802c558c1c958f",
+                        "image": "ibmcom/minio-ppc64le:RELEASE.2019-04-09T01-22-30Z.2",
                         "args": ["server", "/data", "--console-address", ":9001"],
                         "env": [
                             {"name": "MINIO_ROOT_USER", "value": MinIo.Credentials.ACCESS_KEY_VALUE},
@@ -310,11 +328,11 @@ def lmeval_minio_copy_pod(
         volumes=[{"name": "shared-data", "emptyDir": {}}],
         init_containers=[
             {
-                "name": "copy-data",
-                "image": "quay.io/trustyai_testing/lmeval-assets-flan-arceasy"
-                "@sha256:11cc9c2f38ac9cc26c4fab1a01a8c02db81c8f4801b5d2b2b90f90f91b97ac98",
+                "name": "copy-dataset-data",
+                "image": "quay.io/trustyai_testing/lmeval-assets-arc-easy"
+                "@sha256:1558997a838f2ac8ecd887b4f77485d810e5120b9f2700ecb71627e37c6d3a1b",
                 "command": ["/bin/sh", "-c"],
-                "args": ["cp -r /mnt/data /shared"],
+                "args": ["mkdir -p /shared/data && cp -r /mnt/data/. /shared/data/"],
                 "volumeMounts": [{"name": "shared-data", "mountPath": "/shared"}],
                 "securityContext": {
                     "allowPrivilegeEscalation": False,
@@ -322,12 +340,26 @@ def lmeval_minio_copy_pod(
                     "runAsNonRoot": True,
                     "seccompProfile": {"type": "RuntimeDefault"},
                 },
-            }
+            },
+            {
+                "name": "copy-flan-model-data",
+                "image": "quay.io/trustyai_testing/lmeval-assets-flan-t5-base"
+                "@sha256:f7326d5b4069e9aa0b12ab77b1e8aa8dd25dd0bffd77b08fcc84988ea8869f7f",
+                "command": ["/bin/sh", "-c"],
+                "args": ["mkdir -p /shared/data && cp -r /mnt/data/. /shared/data/"],
+                "volumeMounts": [{"name": "shared-data", "mountPath": "/shared"}],
+                "securityContext": {
+                    "allowPrivilegeEscalation": False,
+                    "capabilities": {"drop": ["ALL"]},
+                    "runAsNonRoot": True,
+                    "seccompProfile": {"type": "RuntimeDefault"},
+                },
+            },
         ],
         containers=[
             {
                 "name": "minio-uploader",
-                "image": "quay.io/minio/mc@sha256:470f5546b596e16c7816b9c3fa7a78ce4076bb73c2c73f7faeec0c8043923123",
+                "image": "quay.io/trustyai_testing/minio-mc@sha256:f857d815d4dfb95ccfb6e374cf949f3daebbe05a952d44bbbde3f2552d28e6c0",
                 "command": ["/bin/sh", "-c"],
                 "args": [
                     # Set a writable config dir to avoid permission errors when running as non-root
