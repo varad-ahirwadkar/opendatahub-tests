@@ -297,7 +297,8 @@ def lmeval_minio_deployment(
                 "containers": [
                     {
                         "name": MinIo.Metadata.NAME,
-                        "image": "ibmcom/minio-ppc64le:RELEASE.2019-04-09T01-22-30Z.2",
+                        "image": "quay.io/trustyai_testing/minio"
+                        "@sha256:cf222021b0727b0b3efe1794dd3f1af898071b684c1c67b1ef345ccef636501a",
                         "args": ["server", "/data", "--console-address", ":9001"],
                         "env": [
                             {"name": "MINIO_ROOT_USER", "value": MinIo.Credentials.ACCESS_KEY_VALUE},
