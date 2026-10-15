@@ -105,7 +105,7 @@ def test_validate_trustyai_service_image(
     ],
     indirect=True,
 )
-@pytest.mark.usefixtures("minio_pod")
+@pytest.mark.usefixtures("skip_on_ppc64le", "minio_pod")
 @pytest.mark.rawdeployment
 def test_trustyai_service_db_migration(
     admin_client,

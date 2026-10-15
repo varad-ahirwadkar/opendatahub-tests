@@ -11,6 +11,7 @@ from ocp_resources.config_map import ConfigMap
 from ocp_resources.deployment import Deployment
 from ocp_resources.inference_service import InferenceService
 from ocp_resources.namespace import Namespace
+from ocp_resources.node import Node
 from ocp_resources.pod import Pod
 from ocp_resources.resource import ResourceEditor
 from ocp_resources.role import Role
@@ -68,6 +69,12 @@ DB_UPGRADE_NAMESPACE_SUFFIX: str = "-db-upgrade"
 
 def _is_db_upgrade_namespace(namespace_name: str) -> bool:
     return namespace_name.endswith(DB_UPGRADE_NAMESPACE_SUFFIX)
+
+
+@pytest.fixture(scope="session")
+def skip_on_ppc64le(nodes: list[Node]) -> None:
+    if any(node.instance.status.nodeInfo.architecture == "ppc64le" for node in nodes):
+        pytest.skip("MLServer and OpenVINO runtimes are not supported on ppc64le")
 
 
 @pytest.fixture(scope="class")

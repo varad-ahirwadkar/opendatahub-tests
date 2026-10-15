@@ -30,7 +30,7 @@ from utilities.manifests.openvino import OPENVINO_KSERVE_INFERENCE_CONFIG
     ],
     indirect=True,
 )
-@pytest.mark.usefixtures("minio_pod")
+@pytest.mark.usefixtures("skip_on_ppc64le", "minio_pod")
 class TestPreUpgradeTrustyAIService:
     @pytest.mark.pre_upgrade
     def test_trustyai_service_pre_upgrade_inference(
@@ -101,7 +101,7 @@ class TestPreUpgradeTrustyAIService:
     ],
     indirect=True,
 )
-@pytest.mark.usefixtures("minio_pod")
+@pytest.mark.usefixtures("skip_on_ppc64le", "minio_pod")
 class TestPostUpgradeTrustyAIService:
     """Post-upgrade tests for TrustyAI Service verifying PVC-to-DB storage migration."""
 
@@ -212,7 +212,7 @@ class TestPostUpgradeTrustyAIService:
     indirect=True,
 )
 @pytest.mark.rawdeployment
-@pytest.mark.usefixtures("minio_pod")
+@pytest.mark.usefixtures("skip_on_ppc64le", "minio_pod")
 class TestPreUpgradeTrustyAIServiceDB:
     """Pre-upgrade tests for TrustyAI Service with DB storage from the start."""
 
@@ -290,7 +290,7 @@ class TestPreUpgradeTrustyAIServiceDB:
     indirect=True,
 )
 @pytest.mark.rawdeployment
-@pytest.mark.usefixtures("minio_pod")
+@pytest.mark.usefixtures("skip_on_ppc64le", "minio_pod")
 class TestPostUpgradeTrustyAIServiceDB:
     """Post-upgrade tests for TrustyAI Service with DB storage persistence."""
 

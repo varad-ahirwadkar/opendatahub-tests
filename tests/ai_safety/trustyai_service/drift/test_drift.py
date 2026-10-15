@@ -44,7 +44,7 @@ DRIFT_METRICS = [
     indirect=True,
 )
 @pytest.mark.tier1
-@pytest.mark.usefixtures("minio_pod")
+@pytest.mark.usefixtures("skip_on_ppc64le", "minio_pod")
 @pytest.mark.rawdeployment
 class TestDriftMetrics:
     """

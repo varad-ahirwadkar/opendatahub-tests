@@ -11,7 +11,7 @@ from utilities.constants import MinIo
 from utilities.manifests.openvino import OPENVINO_KSERVE_INFERENCE_CONFIG
 
 
-@pytest.mark.usefixtures("minio_pod")
+@pytest.mark.usefixtures("skip_on_ppc64le", "minio_pod")
 @pytest.mark.parametrize(
     "model_namespaces, minio_pod, minio_data_connection_multi_ns",
     [
@@ -122,7 +122,7 @@ class TestTrustyAIServiceMultipleNS:
     ],
     indirect=True,
 )
-@pytest.mark.usefixtures("minio_pod")
+@pytest.mark.usefixtures("skip_on_ppc64le", "minio_pod")
 @pytest.mark.rawdeployment
 class TestDriftMetricsWithDBStorageMultiNs:
     """
