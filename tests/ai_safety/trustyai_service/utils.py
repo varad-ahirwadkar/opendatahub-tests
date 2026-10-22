@@ -310,6 +310,11 @@ def validate_trustyai_service_db_conn_failure(
     the LastState is in terminated state and the cause was a MariaDB TLS certificate exception.
     Also checks if there are more than one pod for the service.
 
+    The Python-based TrustyAI service exits with a traceback to stderr on DB connection failure;
+    Kubernetes does not populate terminationMessage. The error is verified from the previous
+    container logs instead. re.DOTALL is used so the pattern matches across line boundaries
+    in case the exception class and message are split.
+
     Args:
         client: The OpenShift client.
         namespace: Namespace under which the pod is created.
@@ -325,25 +330,42 @@ def validate_trustyai_service_db_conn_failure(
 
     """
     pods = list(Pod.get(client=client, namespace=namespace.name, label_selector=label_selector))
+    # Matches both the Python mariadb driver (OperationalError + TLS/SSL) and the legacy Java
+    # log format (Could not connect to mariadb: ... PKIX/SSL/socket/Connection refused).
     mariadb_conn_failure_regex = (
-        r"^.+ERROR.+Could not connect to mariadb:.+"
-        r"(PKIX path.*failed|SSL|socket|Connection refused)"
+        r"(mariadb\.OperationalError.*TLS.SSL|"
+        r"Could not connect to mariadb:.*(PKIX path.*failed|SSL|socket|Connection refused))"
     )
     if pods:
         if len(pods) > 1:
             raise TooManyPodsError("More than one pod found in TrustyAIService.")
-        for container_status in pods[0].instance.status.containerStatuses:
-            if (terminate_state := container_status.lastState.terminated) and terminate_state.reason in (
-                pods[0].Status.ERROR,
-                pods[0].Status.CRASH_LOOPBACK_OFF,
+        pod = pods[0]
+        for container_status in pod.instance.status.containerStatuses:
+            if container_status.name != TRUSTYAI_SERVICE_NAME:
+                continue
+            terminate_state = container_status.lastState.terminated
+            if not terminate_state or terminate_state.reason not in (
+                pod.Status.ERROR,
+                pod.Status.CRASH_LOOPBACK_OFF,
             ):
-                if not re.search(mariadb_conn_failure_regex, terminate_state.message):
-                    raise UnexpectedFailureError(
-                        f"Service {TRUSTYAI_SERVICE_NAME} did not fail with a mariadb connection failure as expected.\
-                                  \nExpected format: {mariadb_conn_failure_regex}\
-                                  \nGot: {terminate_state.message}"
-                    )
-                return True
+                continue
+            # terminationMessage is not populated; read the previous container's logs instead.
+            try:
+                previous_log = pod.log(container=TRUSTYAI_SERVICE_NAME, previous=True) or ""
+            except Exception as exc:
+                raise UnexpectedFailureError(
+                    f"Service {TRUSTYAI_SERVICE_NAME} pod {pod.name} crashed as expected "
+                    f"but previous container logs could not be retrieved: {exc}"
+                ) from exc
+            if not re.search(mariadb_conn_failure_regex, previous_log, re.DOTALL):
+                raise UnexpectedFailureError(
+                    f"Service {TRUSTYAI_SERVICE_NAME} did not fail with a mariadb connection "
+                    f"failure as expected.\n"
+                    f"Pod: {pod.name}  Container: {TRUSTYAI_SERVICE_NAME}\n"
+                    f"Expected pattern: {mariadb_conn_failure_regex}\n"
+                    f"Previous logs (last 500 chars): {previous_log[-500:]!r}"
+                )
+            return True
     return False
 
 
