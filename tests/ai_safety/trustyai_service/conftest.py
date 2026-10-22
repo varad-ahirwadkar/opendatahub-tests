@@ -337,7 +337,7 @@ def gaussian_credit_model(
             model_format=XGBOOST,
             runtime=mlserver_runtime.name,
             storage_uri=GAUSSIAN_CREDIT_MODEL_STORAGE_URI,
-            enable_auth=True,
+            enable_auth=False,
             external_route=True,
             wait_for_predictor_pods=False,
             resources=GAUSSIAN_CREDIT_MODEL_RESOURCES,

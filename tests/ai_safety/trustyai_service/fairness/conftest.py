@@ -50,7 +50,7 @@ def onnx_loan_model(
         storage_uri=AiSafetyImages.LOAN_MODEL_ALPHA,
         min_replicas=1,
         resources={"limits": {"cpu": "2", "memory": "8Gi"}, "requests": {"cpu": "1", "memory": "4Gi"}},
-        enable_auth=True,
+        enable_auth=False,
         external_route=True,
         model_version="1",
         wait=True,
