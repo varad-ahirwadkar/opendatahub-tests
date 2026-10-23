@@ -4,13 +4,16 @@ from typing import Any
 
 import pytest
 from kubernetes.dynamic import DynamicClient
+from ocp_resources.config_map import ConfigMap
 from ocp_resources.data_science_cluster import DataScienceCluster
 from ocp_resources.deployment import Deployment
+from ocp_resources.dsc_initialization import DSCInitialization
 from ocp_resources.inference_service import InferenceService
 from ocp_resources.lm_eval_job import LMEvalJob
 from ocp_resources.namespace import Namespace
 from ocp_resources.persistent_volume_claim import PersistentVolumeClaim
 from ocp_resources.pod import Pod
+from ocp_resources.resource import ResourceEditor
 from ocp_resources.route import Route
 from ocp_resources.secret import Secret
 from ocp_resources.service import Service
@@ -24,8 +27,10 @@ from tests.ai_safety.lm_eval.constants import (
     FLAN_T5_IMAGE,
     LMEVAL_OCI_REPO,
     LMEVAL_OCI_TAG,
+    ODH_TRUSTED_CA_BUNDLE_CONFIGMAP,
 )
-from tests.ai_safety.lm_eval.utils import get_lmevaljob_pod
+from tests.ai_safety.lm_eval.utils import get_lmevaljob_pod, wait_for_custom_ca_in_configmap
+from utilities.certificates_utils import get_ca_bundle
 from utilities.constants import (
     ApiGroups,
     KServeDeploymentType,
@@ -873,10 +878,41 @@ def vllm_emulator_tls_route(
 
 
 @pytest.fixture(scope="function")
+def dsci_with_router_ca(
+    admin_client: DynamicClient,
+    model_namespace: Namespace,
+    dsci_resource: DSCInitialization,
+) -> Generator[DSCInitialization, Any, Any]:
+    """DSCInitialization with the ingress router CA added to trustedCABundle.customCABundle.
+
+    Clusters with a self-signed ingress certificate need the router CA in odh-trusted-ca-bundle,
+    otherwise TLS verification of Routes fails in the LMEvalJob pod. No-op on managed clusters.
+    """
+    router_ca_path = get_ca_bundle(client=admin_client)
+    if not router_ca_path:
+        yield dsci_resource
+        return
+
+    with open(router_ca_path, encoding="utf-8") as ca_file:
+        router_ca = ca_file.read()
+
+    with ResourceEditor(patches={dsci_resource: {"spec": {"trustedCABundle": {"customCABundle": router_ca}}}}):
+        wait_for_custom_ca_in_configmap(
+            configmap=ConfigMap(
+                client=admin_client,
+                name=ODH_TRUSTED_CA_BUNDLE_CONFIGMAP,
+                namespace=model_namespace.name,
+            )
+        )
+        yield dsci_resource
+
+
+@pytest.fixture(scope="function")
 def lmevaljob_vllm_emulator_https(
     admin_client: DynamicClient,
     model_namespace: Namespace,
     patched_dsc_lmeval_allow_all: DataScienceCluster,
+    dsci_with_router_ca: DSCInitialization,
     vllm_emulator_deployment: Deployment,
     vllm_emulator_service: Service,
     vllm_emulator_tls_route: TLSRoute,

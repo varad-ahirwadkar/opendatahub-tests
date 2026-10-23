@@ -210,6 +210,27 @@ def validate_ca_bundle_not_injected(pod: Pod, job_name: str) -> None:
     assert not merged_cm.exists, f"Unexpected merged CA ConfigMap '{merged_cm_name}' found in namespace"
 
 
+def wait_for_custom_ca_in_configmap(configmap: ConfigMap, timeout: int = 120) -> None:
+    """Wait until the ODH trusted CA bundle ConfigMap has a non-empty 'odh-ca-bundle.crt' key.
+
+    Args:
+        configmap: The odh-trusted-ca-bundle ConfigMap in the namespace under test.
+        timeout: Maximum seconds to wait for the operator to propagate the custom CA.
+
+    Raises:
+        TimeoutExpiredError: If the key is not populated within the timeout.
+    """
+
+    def _get_custom_ca() -> str:
+        if not configmap.exists:
+            return ""
+        return ((configmap.instance.data or {}).get("odh-ca-bundle.crt") or "").strip()
+
+    for custom_ca in TimeoutSampler(wait_timeout=timeout, sleep=5, func=_get_custom_ca):
+        if custom_ca:
+            return
+
+
 def wait_for_lmevaljob_state(
     lmevaljob: LMEvalJob,
     state: str,
