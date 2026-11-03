@@ -1,8 +1,10 @@
 import pytest
+import requests
 from kubernetes.dynamic import DynamicClient
 from ocp_resources.deployment import Deployment
 from ocp_resources.evalhub import EvalHub
 from ocp_resources.namespace import Namespace
+from ocp_resources.route import Route
 from ocp_resources.service import Service
 from ocp_resources.service_monitor import ServiceMonitor
 from ocp_utilities.monitoring import Prometheus
@@ -11,19 +13,23 @@ from timeout_sampler import TimeoutExpiredError, TimeoutSampler
 from tests.ai_safety.evalhub.constants import (
     EVALHUB_APP_LABEL,
     EVALHUB_COMPONENT_LABEL,
+    EVALHUB_HEALTH_PATH,
     EVALHUB_METRICS_COMPONENT_LABEL,
     EVALHUB_METRICS_PORT,
     EVALHUB_METRICS_SERVICE_SUFFIX,
+    EVALHUB_OTEL_METRICS_STDOUT_CONFIG,
     EVALHUB_SCRAPE_INTERVAL,
 )
+from utilities.guardrails import get_auth_headers
 from utilities.monitoring import validate_metrics_field
 
 
 @pytest.mark.parametrize(
-    "model_namespace",
+    "model_namespace, evalhub_cr",
     [
         pytest.param(
             {"name": "test-evalhub-servicemonitor"},
+            {"otel": EVALHUB_OTEL_METRICS_STDOUT_CONFIG},
         ),
     ],
     indirect=True,
@@ -138,15 +144,27 @@ class TestEvalHubServiceMonitor:
 
     def test_metrics_queryable_via_thanos(
         self,
+        current_client_token: str,
+        evalhub_ca_bundle_file: str,
+        evalhub_route: Route,
         evalhub_cr: EvalHub,
         evalhub_service_monitor: ServiceMonitor,
         prometheus: Prometheus,
     ) -> None:
-        """Verify EvalHub metrics are queryable through the Thanos Querier."""
+        """Verify EvalHub HTTP request metrics are queryable through the Thanos Querier."""
+        health_url = f"https://{evalhub_route.host}{EVALHUB_HEALTH_PATH}"
+        health_resp = requests.get(
+            url=health_url,
+            headers=get_auth_headers(token=current_client_token),
+            verify=evalhub_ca_bundle_file,
+            timeout=10,
+        )
+        assert health_resp.status_code == 200, f"Expected 200 from health endpoint, got {health_resp.status_code}"
+
         sm_name = f"{evalhub_cr.name}{EVALHUB_METRICS_SERVICE_SUFFIX}"
         validate_metrics_field(
             prometheus=prometheus,
-            metrics_query=f'http_requests_total{{job="{sm_name}"}}',
+            metrics_query=f'http_server_request_count_total{{job="{sm_name}"}}',
             expected_value="0",
             greater_than=True,
             timeout=120,
