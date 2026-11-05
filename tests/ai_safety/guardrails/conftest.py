@@ -36,6 +36,7 @@ from utilities.constants import (
     SeaweedFs,
     Timeout,
 )
+from utilities.image_constants import SharedImages
 from utilities.inference_utils import LOGGER, create_isvc
 from utilities.operator_utils import get_cluster_service_version
 from utilities.serving_runtime import ServingRuntimeFromTemplate
@@ -706,7 +707,7 @@ def seaweedfs_deployment_otel(
                 "containers": [
                     {
                         "name": SeaweedFs.Metadata.NAME,
-                        "image": SeaweedFs.PodConfig.IMAGE,
+                        "image": SharedImages.SEAWEEDFS,
                         "args": ["server", "-dir=/data", "-s3", "-iam", "-master.volumePreallocate=false"],
                         "env": [
                             {"name": "accesskey", "value": TEMPO},
