@@ -14,6 +14,7 @@ from _pytest.runner import CallInfo
 from _pytest.terminal import TerminalReporter
 from kubernetes.dynamic import DynamicClient
 from ocp_resources.cluster_service_version import ClusterServiceVersion
+from ocp_resources.node import Node as OcpNode
 from ocp_resources.resource import get_client
 from pytest import (
     Collector,
@@ -27,8 +28,9 @@ from pytest import (
 )
 from pytest_testconfig import config as py_config
 
-from utilities.constants import KServeDeploymentType
+from utilities.constants import KServeDeploymentType, OCIRegistry
 from utilities.database import Database
+from utilities.image_constants import SharedImages
 from utilities.infra import get_dsci_applications_namespace, get_operator_distribution
 from utilities.logger import separator, setup_logging
 from utilities.must_gather_collector import (
@@ -371,6 +373,17 @@ def pytest_sessionstart(session: Session) -> None:
         LOGGER.info("Skipping global config update for collect-only or setup-plan")
         return
     updated_global_config(admin_client=get_client(), config=config)
+
+    # Swap the SeaweedFS and OCI registry images to their ppc64le-capable variants on Power clusters.
+    # Since clusters are not heterogeneous, all nodes share the same architecture
+    nodes = list(OcpNode.get(dyn_client=get_client()))
+    if nodes:
+        cluster_architecture = nodes[0].instance.status.nodeInfo.architecture
+        py_config["cluster_architecture"] = cluster_architecture
+        if cluster_architecture == "ppc64le":
+            LOGGER.info(f"{cluster_architecture} cluster detected, using ppc64le SeaweedFS and OCI registry images")
+            SharedImages.SEAWEEDFS = SharedImages.SEAWEEDFS_PPC64LE
+            OCIRegistry.PodConfig.REGISTRY_IMAGE = SharedImages.DISTRIBUTION_REGISTRY_PPC64LE
 
 
 def updated_global_config(admin_client: DynamicClient, config: Config) -> None:
