@@ -29,4 +29,7 @@ class AiSafetyImages:
     MLSERVER: str = (
         "quay.io/trustyai_testing/mlserver@sha256:68a4cd74fff40a3c4f29caddbdbdc9e54888aba54bf3c5f78c8ffd577c3a1c89"
     )
-    QWEN_HAP_BPIV2_MINIO_PPC64LE: str = "quay.io/vahirwad/qwen2.5-0.5b-instruct-hap-bpiv2-minio:ppc64le"  # noqa: IMG002
+    QWEN_HAP_BPIV2_MINIO_PPC64LE: str = (
+        "quay.io/vahirwad/qwen2.5-0.5b-instruct-hap-bpiv2-minio"
+        "@sha256:b0e5ccb814336e2f7083ee8631dd380f3f24828433362c01bd14f420ca9a2ecf"
+    )
