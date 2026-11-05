@@ -28,7 +28,8 @@ from pytest import (
 )
 from pytest_testconfig import config as py_config
 
-from utilities.constants import KServeDeploymentType, OCIRegistry
+from tests.ai_safety.image_constants import AiSafetyImages
+from utilities.constants import KServeDeploymentType, MinIo, OCIRegistry
 from utilities.database import Database
 from utilities.image_constants import SharedImages
 from utilities.infra import get_dsci_applications_namespace, get_operator_distribution
@@ -381,9 +382,12 @@ def pytest_sessionstart(session: Session) -> None:
         cluster_architecture = nodes[0].instance.status.nodeInfo.architecture
         py_config["cluster_architecture"] = cluster_architecture
         if cluster_architecture == "ppc64le":
-            LOGGER.info(f"{cluster_architecture} cluster detected, using ppc64le SeaweedFS and OCI registry images")
+            LOGGER.info(
+                f"{cluster_architecture} cluster detected, using ppc64le SeaweedFS, OCI registry, and MinIO images"
+            )
             SharedImages.SEAWEEDFS = SharedImages.SEAWEEDFS_PPC64LE
             OCIRegistry.PodConfig.REGISTRY_IMAGE = SharedImages.DISTRIBUTION_REGISTRY_PPC64LE
+            MinIo.PodConfig.QWEN_HAP_BPIV2_MINIO_CONFIG["image"] = AiSafetyImages.QWEN_HAP_BPIV2_MINIO_PPC64LE
 
 
 def updated_global_config(admin_client: DynamicClient, config: Config) -> None:
