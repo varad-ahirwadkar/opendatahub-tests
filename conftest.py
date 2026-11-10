@@ -24,7 +24,8 @@ from _pytest.terminal import TerminalReporter
 from typing import Optional, Any
 from pytest_testconfig import config as py_config
 
-from utilities.constants import KServeDeploymentType, MODEL_REGISTRY_CUSTOM_NAMESPACE, SeaweedFs
+from tests.ai_safety.image_constants import QWEN_HAP_BPIV2_MINIO_PPC64LE
+from utilities.constants import KServeDeploymentType, MODEL_REGISTRY_CUSTOM_NAMESPACE, MinIo, SeaweedFs
 from utilities.database import Database
 from utilities.logger import separator, setup_logging
 from utilities.must_gather_collector import (
@@ -310,8 +311,9 @@ def pytest_collection_finish(session: Session) -> None:
     # Since clusters are not heterogeneous, all nodes share the same architecture
     nodes = list(OcpNode.get(dyn_client=get_client()))
     if nodes and nodes[0].instance.status.nodeInfo.architecture == "ppc64le":
-        LOGGER.info("ppc64le cluster detected, using ppc64le SeaweedFS image")
+        LOGGER.info("ppc64le cluster detected, using ppc64le SeaweedFS and MinIO images")
         SeaweedFs.PodConfig.IMAGE = SeaweedFs.PodConfig.IMAGE_PPC64LE
+        MinIo.PodConfig.QWEN_HAP_BPIV2_MINIO_CONFIG["image"] = QWEN_HAP_BPIV2_MINIO_PPC64LE
 
 
 def updated_global_config(admin_client: DynamicClient, config: Config) -> None:
