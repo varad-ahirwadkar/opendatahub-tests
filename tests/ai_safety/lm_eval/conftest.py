@@ -16,6 +16,7 @@ from ocp_resources.secret import Secret
 from ocp_resources.service import Service
 from ocp_resources.serving_runtime import ServingRuntime
 from pytest import Config, FixtureRequest
+from pytest_testconfig import config as py_config
 
 from tests.ai_safety.lm_eval.constants import (
     ACCELERATOR_IDENTIFIER,
@@ -172,7 +173,10 @@ def oci_registry_pod_with_seaweedfs(
     oci_namespace: Namespace,
     seaweedfs_service: Service,
 ) -> Generator[Pod, Any, Any]:
-    """OCI registry (zot) backed by the SeaweedFS S3 API, used in place of oci_registry_pod_with_minio."""
+    """OCI registry backed by the SeaweedFS S3 API, used in place of oci_registry_pod_with_minio.
+
+    Uses zot, except on ppc64le clusters where a multi-arch registry image is used instead.
+    """
     pod_labels = {Labels.Openshift.APP: OCIRegistry.Metadata.NAME}
 
     if labels := request.param.get("labels"):
@@ -180,6 +184,26 @@ def oci_registry_pod_with_seaweedfs(
 
     seaweedfs_fqdn = f"{seaweedfs_service.name}.{seaweedfs_service.namespace}.svc.cluster.local"
     seaweedfs_endpoint = f"{seaweedfs_fqdn}:{SeaweedFs.Metadata.DEFAULT_PORT}"
+
+    # The multi-arch registry image used on ppc64le is configured through REGISTRY_* env vars instead of ZOT_*
+    if py_config.get("cluster_architecture") == "ppc64le":
+        s3_prefix = "REGISTRY_STORAGE_S3_"
+        registry_env = [
+            {"name": "REGISTRY_STORAGE", "value": OCIRegistry.Storage.STORAGE_DRIVER},
+            {
+                "name": "REGISTRY_HTTP_ADDR",
+                "value": f"{OCIRegistry.Metadata.DEFAULT_HTTP_ADDRESS}:{OCIRegistry.Metadata.DEFAULT_PORT}",
+            },
+            {"name": "REGISTRY_LOG_LEVEL", "value": "info"},
+        ]
+    else:
+        s3_prefix = "ZOT_STORAGE_STORAGEDRIVER_"
+        registry_env = [
+            {"name": "ZOT_STORAGE_STORAGEDRIVER_NAME", "value": OCIRegistry.Storage.STORAGE_DRIVER},
+            {"name": "ZOT_HTTP_ADDRESS", "value": OCIRegistry.Metadata.DEFAULT_HTTP_ADDRESS},
+            {"name": "ZOT_HTTP_PORT", "value": str(OCIRegistry.Metadata.DEFAULT_PORT)},
+            {"name": "ZOT_LOG_LEVEL", "value": "info"},
+        ]
 
     with Pod(
         client=admin_client,
@@ -189,30 +213,18 @@ def oci_registry_pod_with_seaweedfs(
             {
                 "args": request.param.get("args"),
                 "env": [
-                    {"name": "ZOT_STORAGE_STORAGEDRIVER_NAME", "value": OCIRegistry.Storage.STORAGE_DRIVER},
+                    *registry_env,
+                    {"name": f"{s3_prefix}ROOTDIRECTORY", "value": OCIRegistry.Storage.STORAGE_DRIVER_ROOT_DIRECTORY},
+                    {"name": f"{s3_prefix}BUCKET", "value": SeaweedFs.Buckets.MODELMESH_EXAMPLE_MODELS},
+                    {"name": f"{s3_prefix}REGION", "value": OCIRegistry.Storage.STORAGE_DRIVER_REGION},
+                    {"name": f"{s3_prefix}REGIONENDPOINT", "value": f"http://{seaweedfs_endpoint}"},
+                    {"name": f"{s3_prefix}ACCESSKEY", "value": SeaweedFs.Credentials.ACCESS_KEY_VALUE},
+                    {"name": f"{s3_prefix}SECRETKEY", "value": SeaweedFs.Credentials.SECRET_KEY_VALUE},
+                    {"name": f"{s3_prefix}SECURE", "value": OCIRegistry.Storage.STORAGE_STORAGEDRIVER_SECURE},
                     {
-                        "name": "ZOT_STORAGE_STORAGEDRIVER_ROOTDIRECTORY",
-                        "value": OCIRegistry.Storage.STORAGE_DRIVER_ROOT_DIRECTORY,
-                    },
-                    {
-                        "name": "ZOT_STORAGE_STORAGEDRIVER_BUCKET",
-                        "value": SeaweedFs.Buckets.MODELMESH_EXAMPLE_MODELS,
-                    },
-                    {"name": "ZOT_STORAGE_STORAGEDRIVER_REGION", "value": OCIRegistry.Storage.STORAGE_DRIVER_REGION},
-                    {"name": "ZOT_STORAGE_STORAGEDRIVER_REGIONENDPOINT", "value": f"http://{seaweedfs_endpoint}"},
-                    {"name": "ZOT_STORAGE_STORAGEDRIVER_ACCESSKEY", "value": SeaweedFs.Credentials.ACCESS_KEY_VALUE},
-                    {"name": "ZOT_STORAGE_STORAGEDRIVER_SECRETKEY", "value": SeaweedFs.Credentials.SECRET_KEY_VALUE},
-                    {
-                        "name": "ZOT_STORAGE_STORAGEDRIVER_SECURE",
-                        "value": OCIRegistry.Storage.STORAGE_STORAGEDRIVER_SECURE,
-                    },
-                    {
-                        "name": "ZOT_STORAGE_STORAGEDRIVER_FORCEPATHSTYLE",
+                        "name": f"{s3_prefix}FORCEPATHSTYLE",
                         "value": OCIRegistry.Storage.STORAGE_STORAGEDRIVER_FORCEPATHSTYLE,
                     },
-                    {"name": "ZOT_HTTP_ADDRESS", "value": OCIRegistry.Metadata.DEFAULT_HTTP_ADDRESS},
-                    {"name": "ZOT_HTTP_PORT", "value": str(OCIRegistry.Metadata.DEFAULT_PORT)},
-                    {"name": "ZOT_LOG_LEVEL", "value": "info"},
                 ],
                 "image": request.param.get("image", OCIRegistry.PodConfig.REGISTRY_IMAGE),
                 "name": OCIRegistry.Metadata.NAME,
@@ -411,7 +423,7 @@ def vllm_emulator_deployment(
                 "containers": [
                     {
                         "image": "quay.io/trustyai_testing/vllm_emulator"
-                        "@sha256:c4bdd5bb93171dee5b4c8454f36d7c42b58b2a4ceb74f29dba5760ac53b5c12d",
+                        "@sha256:32b5f26b5ec1c5c8052afa26c6d9769dbc864df27a058716c8df62d827cf1d07",
                         "name": "vllm-emulator",
                         "securityContext": {
                             "allowPrivilegeEscalation": False,

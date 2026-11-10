@@ -336,6 +336,11 @@ class OCIRegistry:
 
     class PodConfig:
         REGISTRY_IMAGE: str = "ghcr.io/project-zot/zot:v2.1.8"
+        # Multi-arch distribution registry (includes ppc64le), configured through REGISTRY_* env vars
+        REGISTRY_IMAGE_PPC64LE: str = (
+            "public.ecr.aws/docker/library/registry"
+            "@sha256:d4032d4cc323c1731c707931ecada07a53076eac38e3b61ae57533f170f2c6c3"  # pragma: allowlist secret
+        )
         REGISTRY_BASE_CONFIG: dict[str, Any] = {  # noqa: RUF012
             "args": None,
             "labels": {
@@ -400,6 +405,11 @@ class MinIo:
             **MINIO_BASE_CONFIG,
         }
 
+        QWEN_HAP_BPIV2_MINIO_IMAGE_PPC64LE: str = (
+            "quay.io/vahirwad/qwen2.5-0.5b-instruct-hap-bpiv2-minio"
+            "@sha256:b0e5ccb814336e2f7083ee8631dd380f3f24828433362c01bd14f420ca9a2ecf"  # pragma: allowlist secret
+        )
+
         KSERVE_MINIO_CONFIG: dict[str, Any] = {  # noqa: RUF012
             "image": KSERVE_MINIO_IMAGE,
             **MINIO_BASE_CONFIG,
@@ -435,6 +445,10 @@ class SeaweedFs:
     class PodConfig:
         IMAGE: str = (
             "ghcr.io/chrislusf/seaweedfs@sha256:6620371e8af8282056685c652d4637265698c9e2c2d59f9594e6ac333ad6c634"
+        )
+        IMAGE_PPC64LE: str = (
+            "icr.io/ppc64le-oss/seaweedfs-ppc64le"
+            "@sha256:f0671dcb703b1301b546e4ab016496d818bdb1ae596dea91d135d9ce236eb698"  # pragma: allowlist secret
         )
         ARGS: tuple[str, ...] = (
             "server",
