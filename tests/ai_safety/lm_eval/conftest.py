@@ -164,11 +164,30 @@ def lmeval_data_downloader_pod(
         name="lmeval-downloader",
         label={"lmevaltests": "vllm"},
         security_context={"fsGroup": 1000, "seccompProfile": {"type": "RuntimeDefault"}},
+        init_containers=[
+            {
+                "name": "flan-data-copy-to-pvc",
+                "image": "quay.io/trustyai_testing/lmeval-assets-flan-t5-base"
+                "@sha256:f7326d5b4069e9aa0b12ab77b1e8aa8dd25dd0bffd77b08fcc84988ea8869f7f",
+                "command": ["/bin/sh", "-c", "cp -r /mnt/data/flan /mnt/pvc/flan"],
+                "securityContext": {
+                    "runAsUser": 1000,
+                    "runAsNonRoot": True,
+                    "allowPrivilegeEscalation": False,
+                    "capabilities": {"drop": ["ALL"]},
+                },
+                "volumeMounts": [{"mountPath": "/mnt/pvc", "name": "pvc-volume"}],
+            }
+        ],
         containers=[
             {
                 "name": "data",
                 "image": request.param.get("image"),
-                "command": ["/bin/sh", "-c", "cp -r /mnt/data/. /mnt/pvc/ && chmod -R g+w /mnt/pvc/datasets"],
+                "command": [
+                    "/bin/sh",
+                    "-c",
+                    "cp -r /mnt/data/datasets /mnt/pvc/datasets && chmod -R g+w /mnt/pvc/datasets",
+                ],
                 "securityContext": {
                     "runAsUser": 1000,
                     "runAsNonRoot": True,
@@ -208,7 +227,7 @@ def vllm_emulator_deployment(
                 "containers": [
                     {
                         "image": "quay.io/trustyai_testing/vllm_emulator"
-                        "@sha256:c4bdd5bb93171dee5b4c8454f36d7c42b58b2a4ceb74f29dba5760ac53b5c12d",
+                        "@sha256:32b5f26b5ec1c5c8052afa26c6d9769dbc864df27a058716c8df62d827cf1d07",
                         "name": "vllm-emulator",
                         "securityContext": {
                             "allowPrivilegeEscalation": False,
@@ -341,11 +360,11 @@ def lmeval_seaweedfs_copy_pod(
         volumes=[{"name": "shared-data", "emptyDir": {}}],
         init_containers=[
             {
-                "name": "copy-data",
-                "image": "quay.io/trustyai_testing/lmeval-assets-flan-arceasy"
-                "@sha256:11cc9c2f38ac9cc26c4fab1a01a8c02db81c8f4801b5d2b2b90f90f91b97ac98",
+                "name": "copy-dataset-data",
+                "image": "quay.io/trustyai_testing/lmeval-assets-arc-easy"
+                "@sha256:1558997a838f2ac8ecd887b4f77485d810e5120b9f2700ecb71627e37c6d3a1b",
                 "command": ["/bin/sh", "-c"],
-                "args": ["cp -r /mnt/data /shared"],
+                "args": ["mkdir -p /shared/data && cp -r /mnt/data/. /shared/data/"],
                 "volumeMounts": [{"name": "shared-data", "mountPath": "/shared"}],
                 "securityContext": {
                     "allowPrivilegeEscalation": False,
@@ -353,7 +372,21 @@ def lmeval_seaweedfs_copy_pod(
                     "runAsNonRoot": True,
                     "seccompProfile": {"type": "RuntimeDefault"},
                 },
-            }
+            },
+            {
+                "name": "copy-flan-model-data",
+                "image": "quay.io/trustyai_testing/lmeval-assets-flan-t5-base"
+                "@sha256:f7326d5b4069e9aa0b12ab77b1e8aa8dd25dd0bffd77b08fcc84988ea8869f7f",
+                "command": ["/bin/sh", "-c"],
+                "args": ["mkdir -p /shared/data && cp -r /mnt/data/. /shared/data/"],
+                "volumeMounts": [{"name": "shared-data", "mountPath": "/shared"}],
+                "securityContext": {
+                    "allowPrivilegeEscalation": False,
+                    "capabilities": {"drop": ["ALL"]},
+                    "runAsNonRoot": True,
+                    "seccompProfile": {"type": "RuntimeDefault"},
+                },
+            },
         ],
         containers=[
             {

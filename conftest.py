@@ -24,7 +24,7 @@ from _pytest.terminal import TerminalReporter
 from typing import Optional, Any
 from pytest_testconfig import config as py_config
 
-from utilities.constants import KServeDeploymentType, MODEL_REGISTRY_CUSTOM_NAMESPACE
+from utilities.constants import KServeDeploymentType, MODEL_REGISTRY_CUSTOM_NAMESPACE, SeaweedFs
 from utilities.database import Database
 from utilities.logger import separator, setup_logging
 from utilities.must_gather_collector import (
@@ -36,6 +36,7 @@ from utilities.must_gather_collector import (
 )
 from kubernetes.dynamic import DynamicClient
 from utilities.infra import get_operator_distribution, get_dsci_applications_namespace, get_data_science_cluster
+from ocp_resources.node import Node as OcpNode
 from ocp_resources.resource import get_client
 from ocp_resources.cluster_service_version import ClusterServiceVersion
 
@@ -305,6 +306,12 @@ def pytest_collection_finish(session: Session) -> None:
             LOGGER.info("Skipping global config update for cluster_health-only run (DSC not required)")
             return
     updated_global_config(admin_client=get_client(), config=config)
+
+    # Since clusters are not heterogeneous, all nodes share the same architecture
+    nodes = list(OcpNode.get(dyn_client=get_client()))
+    if nodes and nodes[0].instance.status.nodeInfo.architecture == "ppc64le":
+        LOGGER.info("ppc64le cluster detected, using ppc64le SeaweedFS image")
+        SeaweedFs.PodConfig.IMAGE = SeaweedFs.PodConfig.IMAGE_PPC64LE
 
 
 def updated_global_config(admin_client: DynamicClient, config: Config) -> None:
