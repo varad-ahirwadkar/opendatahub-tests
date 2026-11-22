@@ -127,13 +127,16 @@ class TestEvalHubServiceMonitor:
         evalhub_service_monitor: ServiceMonitor,
         prometheus: Prometheus,
     ) -> None:
-        """Verify EvalHub appears as an active scrape target (UP) in Prometheus."""
+        """Verify EvalHub appears as an active scrape target (UP) in Prometheus.
+
+        The user-workload Prometheus reloads its config every 3 minutes, so a new
+        ServiceMonitor can take longer than that to show up as a target.
+        """
         sm_name = f"{evalhub_cr.name}{EVALHUB_METRICS_SERVICE_SUFFIX}"
         validate_metrics_field(
             prometheus=prometheus,
             metrics_query=f'up{{job="{sm_name}"}}',
             expected_value="1",
-            timeout=120,
         )
 
     def test_metrics_queryable_via_thanos(
